@@ -60,19 +60,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: clickstack_db
+  name: clickstackdb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: clickstack_db
+      app: clickstackdb
   template:
     metadata:
       labels:
-        app: clickstack_db
+        app: clickstackdb
     spec:
       containers:
-      - name: clickstack_db
+      - name: clickstackdb
         image: mysql:8
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -82,8 +82,9 @@ spec:
         ports:
         - containerPort: 3306
         volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: clickstack-db-storage
+        - name: clickstack-db-storage
+          mountPath: /var/lib/mysql
+
       volumes:
       - name: clickstack-db-storage
         persistentVolumeClaim:
