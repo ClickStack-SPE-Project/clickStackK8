@@ -7,20 +7,21 @@
     aws_region: "{{ aws_region }}"
     s3_bucket_name: "{{ s3_bucket_name }}"
   tasks:
-    - name: Get latest kubectl version
-      command: curl -L -s https://dl.k8s.io/release/stable.txt
-      register: kubectl_version
+    - name: Install Minikube on Linux
+      block:
+        - name: Download Minikube binary
+          get_url:
+            url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+            dest: /usr/local/bin/minikube
+            mode: '0755'
+          when: ansible_os_family == 'Linux'
 
-    - name: Set kubectl download URL
-      set_fact:
-        kubectl_url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+        - name: Start Minikube
+          command: minikube start
+          when: ansible_os_family == 'Linux'
 
-    - name: Download kubectl
-      get_url:
-        url: "{{ kubectl_url }}"
-        dest: /usr/local/bin/kubectl
-        mode: '0755'
-      when: ansible_os_family == 'Linux'
+    - name: Ensure kubectl is using Minikube context
+      command: kubectl config use-context minikube    
 
     - name: Install Kubernetes Ansible modules
       ansible.builtin.pip:
@@ -36,4 +37,4 @@
         - clickstack_db
 
     - name: Apply Kubernetes manifests
-      command: kubectl apply -f ./deployment.yml
+      command: kubectl apply -f ./deployment.yml --validate=false
