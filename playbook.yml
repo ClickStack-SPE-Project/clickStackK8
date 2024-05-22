@@ -7,6 +7,12 @@
     aws_region: "{{ aws_region }}"
     s3_bucket_name: "{{ s3_bucket_name }}"
   tasks:
+    - name: Download kubectl
+      get_url:
+        url: "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
     - name: Install kubectl
       ansible.builtin.package:
         name: kubectl
