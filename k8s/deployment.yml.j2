@@ -17,7 +17,7 @@ spec:
         image: {{ dockerhub_user }}/clickstackbackend
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://clickstack_db:3306/clickStack?createDatabaseIfNotExist=true"
+          value: "jdbc:mysql://clickstackdb:3306/clickStack?createDatabaseIfNotExist=true"
         - name: SPRING_DATASOURCE_USERNAME
           value: "root"
         - name: SPRING_DATASOURCE_PASSWORD

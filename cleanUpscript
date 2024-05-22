@@ -24,3 +24,8 @@ kubectl get pvc
 kubectl get pv
 
 echo "Clean-up complete. You can now proceed with the new setup."
+
+
+
+
+kubectl port-forward deployment/clickstackfrontend 3000:80
