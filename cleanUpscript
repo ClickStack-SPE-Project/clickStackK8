@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Delete deployments
+kubectl delete deployment clickstackbackend clickstackfrontend clickstackdb
+
+# Delete services
+kubectl delete service clickstackbackend clickstackfrontend clickstackdb
+
+# Delete all replica sets
+kubectl delete replicaset --all
+
+# Delete persistent volume claims
+kubectl delete pvc clickstack-db-pvc
+
+# Delete persistent volumes
+kubectl delete pv clickstack-db-pv
+
+# Delete all pods
+kubectl delete pod --all
+
+# Verify clean up
+kubectl get all
+kubectl get pvc
+kubectl get pv
+
+echo "Clean-up complete. You can now proceed with the new setup."
