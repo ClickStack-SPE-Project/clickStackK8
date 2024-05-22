@@ -64,6 +64,22 @@
     - name: Apply PersistentVolumeClaim
       command: kubectl apply -f ./persistent_volume_claim.yml
 
+    - name: Create Kubernetes service manifests
+      copy:
+        content: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: clickstackdb
+          spec:
+            ports:
+              - port: 3306
+            selector:
+              app: clickstackdb
+        dest: ./db_service.yml
+
+    - name: Apply MySQL Service
+      command: kubectl apply -f ./db_service.yml
 
     - name: Create Kubernetes manifests
       template:
@@ -75,4 +91,4 @@
         - clickstack_db
 
     - name: Apply Kubernetes manifests
-      command: kubectl apply -f ./deployment.yml 
+      command: kubectl apply -f ./deployment.yml --validate=false
