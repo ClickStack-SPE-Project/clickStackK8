@@ -7,16 +7,24 @@
     aws_region: "{{ aws_region }}"
     s3_bucket_name: "{{ s3_bucket_name }}"
   tasks:
+    - name: Get latest kubectl version
+      command: curl -L -s https://dl.k8s.io/release/stable.txt
+      register: kubectl_version
+
+    - name: Set kubectl download URL
+      set_fact:
+        kubectl_url: "https://dl.k8s.io/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+
     - name: Download kubectl
       get_url:
-        url: "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        url: "{{ kubectl_url }}"
         dest: /usr/local/bin/kubectl
         mode: '0755'
+      when: ansible_os_family == 'Linux'
 
-    - name: Install kubectl
-      ansible.builtin.package:
-        name: kubectl
-        state: present
+    - name: Install Kubernetes Ansible modules
+      ansible.builtin.pip:
+        name: kubernetes
 
     - name: Create Kubernetes manifests
       template:
