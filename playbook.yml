@@ -27,6 +27,44 @@
       ansible.builtin.pip:
         name: kubernetes
 
+    - name: Create PersistentVolume
+      copy:
+        content: |
+          apiVersion: v1
+          kind: PersistentVolume
+          metadata:
+            name: clickstack-db-pv
+          spec:
+            capacity:
+              storage: 1Gi
+            accessModes:
+              - ReadWriteOnce
+            hostPath:
+              path: /mnt/data/clickstack-db
+        dest: ./persistent_volume.yml
+
+    - name: Apply PersistentVolume
+      command: kubectl apply -f ./persistent_volume.yml
+
+    - name: Create PersistentVolumeClaim
+      copy:
+        content: |
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: clickstack-db-pvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+        dest: ./persistent_volume_claim.yml
+
+    - name: Apply PersistentVolumeClaim
+      command: kubectl apply -f ./persistent_volume_claim.yml
+
+
     - name: Create Kubernetes manifests
       template:
         src: k8s/deployment.yml.j2
@@ -37,4 +75,4 @@
         - clickstack_db
 
     - name: Apply Kubernetes manifests
-      command: kubectl apply -f ./deployment.yml --validate=false
+      command: kubectl apply -f ./deployment.yml 
