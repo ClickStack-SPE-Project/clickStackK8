@@ -1,34 +1,25 @@
-- name: Use docker compose to run all containers
+- name: Deploy to Kubernetes
   hosts: local
   vars:
+    dockerhub_user: "{{ dockerhub_user }}"
     aws_access_key_id: "{{ aws_access_key_id }}"
     aws_secret_access_key: "{{ aws_secret_access_key }}"
     aws_region: "{{ aws_region }}"
     s3_bucket_name: "{{ s3_bucket_name }}"
   tasks:
-    - name: Install Docker SDK for Python
-      ansible.builtin.pip:
-        name: 
-          - "docker==6.1.3"
-          - "docker-compose"
-
-    - name: Start docker service
-      service:
-        name: docker
-        state: started
-
-    - name: Copy Docker Compose file
-      copy:
-        src: docker-compose.yml
-        dest: ./
-        
-    - name: Run docker compose up command
-      docker_compose:
-        project_src: ./
+    - name: Install kubectl
+      ansible.builtin.package:
+        name: kubectl
         state: present
-        pull: yes
-      environment:
-        AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
-        AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
-        AWS_REGION: "{{ aws_region }}"
-        S3_BUCKET_NAME: "{{ s3_bucket_name }}"
+
+    - name: Create Kubernetes manifests
+      template:
+        src: k8s/deployment.yml.j2
+        dest: ./deployment.yml
+      with_items:
+        - clickstackbackend
+        - clickstackfrontend
+        - clickstack_db
+
+    - name: Apply Kubernetes manifests
+      command: kubectl apply -f ./deployment.yml

@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/ClickStack-SPE-Project/clickStack'
+                git branch: 'main', url: 'https://github.com/ClickStack-SPE-Project/clickStackK8'
             }
         }
         stage('Maven Build Backend'){
@@ -53,6 +53,7 @@ pipeline {
                         playbook: 'playbook.yml',
                         inventory: 'inventory',
                         extraVars: [
+                            dockerhub_user: "${env.DOCKERHUB_USER}",
                             aws_access_key_id: "${env.AWS_ACCESS_KEY_ID}",
                             aws_secret_access_key: "${env.AWS_SECRET_ACCESS_KEY}",
                             aws_region: "${env.AWS_REGION}",

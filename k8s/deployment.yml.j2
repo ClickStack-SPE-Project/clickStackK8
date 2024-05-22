@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickstackbackend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickstackbackend
+  template:
+    metadata:
+      labels:
+        app: clickstackbackend
+    spec:
+      containers:
+      - name: clickstackbackend
+        image: {{ dockerhub_user }}/clickstackbackend
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://clickstack_db:3306/clickStack?createDatabaseIfNotExist=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "root"
+        - name: AWS_ACCESS_KEY_ID
+          value: "{{ aws_access_key_id }}"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "{{ aws_secret_access_key }}"
+        - name: AWS_REGION
+          value: "{{ aws_region }}"
+        - name: S3_BUCKET_NAME
+          value: "{{ s3_bucket_name }}"
+        ports:
+        - containerPort: 9191
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickstackfrontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickstackfrontend
+  template:
+    metadata:
+      labels:
+        app: clickstackfrontend
+    spec:
+      containers:
+      - name: clickstackfrontend
+        image: {{ dockerhub_user }}/clickstackfrontend
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickstack_db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickstack_db
+  template:
+    metadata:
+      labels:
+        app: clickstack_db
+    spec:
+      containers:
+      - name: clickstack_db
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: MYSQL_DATABASE
+          value: "clickStack"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: clickstack-db-storage
+      volumes:
+      - name: clickstack-db-storage
+        persistentVolumeClaim:
+          claimName: clickstack-db-pvc
