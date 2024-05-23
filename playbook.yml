@@ -92,3 +92,23 @@
 
     - name: Apply Kubernetes manifests
       command: kubectl apply -f ./deployment.yml --validate=false
+
+    - name: Create Frontend Service manifest
+      copy:
+        content: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: clickstackfrontend
+          spec:
+            type: LoadBalancer
+            selector:
+              app: clickstackfrontend
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 80
+        dest: ./frontend_service.yml
+
+    - name: Apply Frontend Service
+      command: kubectl apply -f ./frontend_service.yml  
